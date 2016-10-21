@@ -66,7 +66,6 @@ function renderMaterias(){
 
 
 function renderSenadores(){
-
     var table = '<div class="table-responsive"><table class="table">';
 
     $.get('http://legis.senado.leg.br/dadosabertos/senador/lista/atual ', function(data){
