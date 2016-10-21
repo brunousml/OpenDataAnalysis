@@ -1,0 +1,24 @@
+{% extends "charts/base_2.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-10">
+            <h1 class="page-header">{{data.rss.channel.title}}</h1>
+            <small><a href="http://dadosabertos.senado.leg.br/dataset/rss-de-projetos-e-medidas-provisorias/resource/423883e4-5652-4244-be48-2fd782408d2a" target="_blank">Fonte</a> dos dados</small>
+        </div>
+    </div>
+
+    {% for node in channel.item %}
+        <div class="row">
+            <div class="col-md-8">
+                <h3><a href="{{ node.link }}">{{ node.title }}</a></h3>
+                <h4>{{ node.pubDate }}</h4>
+                <p>{{ node.description|safe }}</p>
+                <a class="btn btn-primary" href="{{ node.link }}" target="_blank">View Project <span class="glyphicon glyphicon-chevron-right"></span></a>
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}
+
+
