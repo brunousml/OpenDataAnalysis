@@ -12,7 +12,7 @@ class State(models.Model):
 
 
 class ParliamentaryIdentification(models.Model):
-    identification = models.IntegerField()
+    code = models.IntegerField()
     name = models.CharField(max_length=200)
     full_name = models.CharField(max_length=400)
     gender = models.CharField(max_length=20)
@@ -27,8 +27,42 @@ class ParliamentaryIdentification(models.Model):
         return self.name
 
 
+class Legislature(models.Model):
+    number = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+
+class Exercise(models.Model):
+    code = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+
+class Alternate(models.Model):
+    participation_description = models.CharField(max_length=100)
+    code = models.IntegerField()
+    name = models.CharField(max_length=200)
+
+
+class ActualMandate(models.Model):
+    alternates = models.ForeignKey(Alternate, unique=False)
+    exercises = models.ForeignKey(Exercise, unique=False)
+    state = models.ForeignKey(State)
+
+    code = models.IntegerField()
+    participation_description = models.CharField(max_length=100)
+
+
 class Parliamentary(models.Model):
     identification = models.OneToOneField(ParliamentaryIdentification)
+    actual_mandate = models.OneToOneField(ActualMandate, null=True, blank=True)
+
+    birth_date = models.DateField(null=True)
+    natural_state = models.ForeignKey(State, null=True)
+    address = models.TextField(null=True)
+    phone = models.CharField(max_length=100, null=True)
+    fax = models.CharField(max_length=100, null=True)
 
     def __unicode__(self):
         return unicode(self.identification.name)

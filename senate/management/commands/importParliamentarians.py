@@ -1,39 +1,37 @@
-import urllib2
+from django.core.management.base import BaseCommand
 
-from django.core.management.base import BaseCommand, CommandError
-import json
-
+from data.OpenDataParliamentary import OpenDataParliamentaryBrJsonParser
 from senate.models import Parliamentary, ParliamentaryIdentification, State
 
 
-def getParliamentaryIdentification(parliamentary):
+def get_parliamentary_identification(parliamentary):
+
+    parser = OpenDataParliamentaryBrJsonParser(parliamentary)
+
     parliamentary_identification = ParliamentaryIdentification.objects.filter(
-        name=parliamentary[u'IdentificacaoParlamentar'][u'NomeParlamentar'])
+        name=parser.get_parliamentary_node('NomeParlamentar')
+    )
 
     if not parliamentary_identification:
         # Get State
-        state = State.objects.filter(slug=parliamentary[u'IdentificacaoParlamentar'][u'UfParlamentar'])
+        state = State.objects.filter(slug=parser.get_parliamentary_node('UfParlamentar'))
         if not state:
-            state = State(slug=parliamentary[u'IdentificacaoParlamentar'][u'UfParlamentar'])
+            state = State(slug=parser.get_parliamentary_node('UfParlamentar'))
             state.save()
         else:
             state = state[0]
 
         # Create Parliamentary
-        email = ''
-        if 'EmailParlamentar' in parliamentary[u'IdentificacaoParlamentar']:
-            email = parliamentary[u'IdentificacaoParlamentar'][u'EmailParlamentar']
-
         parliamentary_identification = ParliamentaryIdentification(
-            identification=int(parliamentary[u'IdentificacaoParlamentar'][u'CodigoParlamentar']),
-            name=parliamentary[u'IdentificacaoParlamentar'][u'NomeParlamentar'],
-            full_name=parliamentary[u'IdentificacaoParlamentar'][u'NomeCompletoParlamentar'],
-            gender=parliamentary[u'IdentificacaoParlamentar'][u'SexoParlamentar'],
-            salutation=parliamentary[u'IdentificacaoParlamentar'][u'FormaTratamento'],
-            url_photo=parliamentary[u'IdentificacaoParlamentar'][u'UrlFotoParlamentar'],
-            url_page=parliamentary[u'IdentificacaoParlamentar'][u'UrlPaginaParlamentar'],
-            email=email,
-            acronym_party=parliamentary[u'IdentificacaoParlamentar'][u'SiglaPartidoParlamentar'],
+            code=parser.get_parliamentary_node('CodigoParlamentar'),
+            name=parser.get_parliamentary_node('NomeParlamentar'),
+            full_name=parser.get_parliamentary_node('NomeCompletoParlamentar'),
+            gender=parser.get_parliamentary_node('SexoParlamentar'),
+            salutation=parser.get_parliamentary_node('FormaTratamento'),
+            url_photo=parser.get_parliamentary_node('UrlFotoParlamentar'),
+            url_page=parser.get_parliamentary_node('UrlPaginaParlamentar'),
+            email=parser.get_parliamentary_node('EmailParlamentar'),
+            acronym_party=parser.get_parliamentary_node('SiglaPartidoParlamentar'),
             state=state,
 
         )
@@ -45,22 +43,14 @@ def getParliamentaryIdentification(parliamentary):
 
 
 class Command(BaseCommand):
-    def getData(self, url):
-        headers = {'Accept': 'Application/json'}
-        req = urllib2.Request(url, None, headers)
-        file = urllib2.urlopen(req)
-        data = file.read()
-        file.close()
-
-        return json.loads(data)
-
     def handle(self, *args, **options):
-        parliamentarians = self.getData('http://legis.senado.leg.br/dadosabertos/senador/lista/atual')
-        for parliamentary in parliamentarians[u'ListaParlamentarEmExercicio'][u'Parlamentares'][u'Parlamentar']:
+        parliamentarians = OpenDataParliamentaryBrJsonParser.get_parliamentarians()
+
+        for parliamentary in parliamentarians:
             self.stdout.write(
                 self.style.SUCCESS(unicode(parliamentary[u'IdentificacaoParlamentar'][u'NomeCompletoParlamentar'])))
 
-            p_identification = getParliamentaryIdentification(parliamentary)
+            p_identification = get_parliamentary_identification(parliamentary)
             parliamentary = Parliamentary.objects.filter(identification=p_identification)
 
             if not parliamentary:
@@ -69,3 +59,4 @@ class Command(BaseCommand):
                 parliamentary = parliamentary[0]
 
             parliamentary.save()
+
