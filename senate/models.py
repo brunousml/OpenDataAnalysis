@@ -26,8 +26,9 @@ class ParliamentaryIdentification(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class Parliamentary(models.Model):
-    identification = models.ForeignKey(ParliamentaryIdentification)
+    identification = models.OneToOneField(ParliamentaryIdentification)
 
     def __unicode__(self):
         return unicode(self.identification.name)

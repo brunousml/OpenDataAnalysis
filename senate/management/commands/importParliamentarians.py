@@ -63,5 +63,9 @@ class Command(BaseCommand):
             p_identification = getParliamentaryIdentification(parliamentary)
             parliamentary = Parliamentary.objects.filter(identification=p_identification)
 
-            parliamentary = Parliamentary(identification=p_identification)
+            if not parliamentary:
+                parliamentary = Parliamentary(identification=p_identification)
+            else:
+                parliamentary = parliamentary[0]
+
             parliamentary.save()
