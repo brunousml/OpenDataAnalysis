@@ -61,7 +61,7 @@ function renderMaterias(){
                 });
             });
         });
-    }, 'xml');
+    }, 'json');
 }
 
 
@@ -69,12 +69,6 @@ function renderSenadores(){
     var table = '<div class="table-responsive"><table class="table">';
 
     $.get('http://legis.senado.leg.br/dadosabertos/senador/lista/atual ', function(data){
-        var ListaParlamentarEmExercicio = $(data);
-        ListaParlamentarEmExercicio.each(function(){
-            var parlamentares = $(this).find('Parlamentares');
-            parlamentares.each(function(){
-                var parlamentar = $(this).find('Parlamentar');
-                parlamentar.each(function(){
                     var identificacaoParlamentar = $(this).find('IdentificacaoParlamentar');
                     var CodigoParlamentar = identificacaoParlamentar.find('CodigoParlamentar').text();
                     var UrlFotoParlamentar = identificacaoParlamentar.find('UrlFotoParlamentar').text();
@@ -100,7 +94,7 @@ function renderSenadores(){
         table = table + '</table></div> ';
         $('#ajax-content').html(table);
 
-    }, 'xml');
+    }, 'json');
 }
 
 $(document).ready(function(){

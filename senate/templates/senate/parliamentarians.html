@@ -1,4 +1,4 @@
-{% extends "charts/base.html" %}
+{% extends "senate/base.html" %}
 {% load static %}
 
 {% block content %}
@@ -12,16 +12,15 @@
         <div id="loading" style="margin: 0 auto; max-width:50%; text-align: center;">
             <p>Estamos coletando dados abertos disponiveis em
                 <a href="http://dadosabertos.senado.leg.br/">http://dadosabertos.senado.leg.br/</a> </p>
-            <img src="{% static 'charts/img/loading.gif' %}" />
+            <img src="{% static 'senate/img/loading.gif' %}" />
         </div>
     </div>
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'charts/js/build/app.js' %}"></script>
+<script src="{% static 'senate/js/build/app.js' %}"></script>
 
 <script>
-
     $(document).ready(function(){
         renderSenadores();
     });
