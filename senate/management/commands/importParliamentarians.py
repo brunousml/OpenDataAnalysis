@@ -1,62 +1,76 @@
 from django.core.management.base import BaseCommand
 
 from data.OpenDataParliamentary import OpenDataParliamentaryBrJsonParser
-from senate.models import Parliamentary, ParliamentaryIdentification, State
+from senate.models import Parliamentary, ParliamentaryIdentification, State, ActualMandate
 
 
-def get_parliamentary_identification(parliamentary):
+def get_state(parser, node, field):
+    state, create = State.objects.get_or_create(slug=parser.get_parliamentary_node_field(node, field))
 
-    parser = OpenDataParliamentaryBrJsonParser(parliamentary)
+    if create:
+        state.save()
 
-    parliamentary_identification = ParliamentaryIdentification.objects.filter(
-        name=parser.get_parliamentary_node('NomeParlamentar')
+    return state
+
+
+def get_parliamentary_identification(open_data):
+
+    parliamentary_identification, create = ParliamentaryIdentification.objects.get_or_create(
+        code=open_data.get_parliamentary_identity('CodigoParlamentar')
     )
 
-    if not parliamentary_identification:
-        # Get State
-        state = State.objects.filter(slug=parser.get_parliamentary_node('UfParlamentar'))
-        if not state:
-            state = State(slug=parser.get_parliamentary_node('UfParlamentar'))
-            state.save()
-        else:
-            state = state[0]
+    parliamentary_identification.name = open_data.get_parliamentary_identity('NomeParlamentar')
+    parliamentary_identification.full_name = open_data.get_parliamentary_identity('NomeCompletoParlamentar')
+    parliamentary_identification.gender = open_data.get_parliamentary_identity('SexoParlamentar')
+    parliamentary_identification.salutation = open_data.get_parliamentary_identity('FormaTratamento')
+    parliamentary_identification.url_photo = open_data.get_parliamentary_identity('UrlFotoParlamentar')
+    parliamentary_identification.url_page = open_data.get_parliamentary_identity('UrlPaginaParlamentar')
+    parliamentary_identification.email = open_data.get_parliamentary_identity('EmailParlamentar')
+    parliamentary_identification.acronym_party = open_data.get_parliamentary_identity('SiglaPartidoParlamentar')
+    parliamentary_identification.state = get_state(open_data, 'IdentificacaoParlamentar', 'UfParlamentar')
 
-        # Create Parliamentary
-        parliamentary_identification = ParliamentaryIdentification(
-            code=parser.get_parliamentary_node('CodigoParlamentar'),
-            name=parser.get_parliamentary_node('NomeParlamentar'),
-            full_name=parser.get_parliamentary_node('NomeCompletoParlamentar'),
-            gender=parser.get_parliamentary_node('SexoParlamentar'),
-            salutation=parser.get_parliamentary_node('FormaTratamento'),
-            url_photo=parser.get_parliamentary_node('UrlFotoParlamentar'),
-            url_page=parser.get_parliamentary_node('UrlPaginaParlamentar'),
-            email=parser.get_parliamentary_node('EmailParlamentar'),
-            acronym_party=parser.get_parliamentary_node('SiglaPartidoParlamentar'),
-            state=state,
-
-        )
-        parliamentary_identification.save()
-    else:
-        parliamentary_identification = parliamentary_identification[0]
+    parliamentary_identification.save()
 
     return parliamentary_identification
+
+
+def get_parliamentary_actual_mandate(parliamentary):
+    open_data = OpenDataParliamentaryBrJsonParser(parliamentary)
+
+    actual_mandate = ActualMandate.objects.get_or_create(
+        code=open_data.get_parliamentary_actual_mandate('CodigoMandato')
+    )
+
+    actual_mandate.state = get_state(open_data, 'MandatoAtual', 'UfParlamentar')
+
+    return True
+
+
+def save_parliamentary(el):
+    open_data = OpenDataParliamentaryBrJsonParser()
+    open_data.get_parliamentary(el['IdentificacaoParlamentar']['CodigoParlamentar'])
+
+    # Identification
+    p_identification = get_parliamentary_identification(open_data)
+
+    # Actual Mandate
+    # p_actual_mandate = get_parliamentary_actual_mandate(parliamentary)
+
+    # Basic Information
+    parliamentary, create = Parliamentary.objects.get_or_create(identification=p_identification)
+
+    parliamentary.natural_state = get_state(open_data, 'DadosBasicosParlamentar', 'UfNaturalidade')
+    parliamentary.address = open_data.get_parliamentary_basic_data('EnderecoParlamentar')
+    parliamentary.phone = open_data.get_parliamentary_basic_data('TelefoneParlamentar')
+    parliamentary.fax = open_data.get_parliamentary_basic_data('FaxParlamentar')
+    parliamentary.birth_date = open_data.get_parliamentary_basic_data('DataNascimento')
+    parliamentary.save()
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         parliamentarians = OpenDataParliamentaryBrJsonParser.get_parliamentarians()
-
-        for parliamentary in parliamentarians:
+        for el in parliamentarians:
             self.stdout.write(
-                self.style.SUCCESS(unicode(parliamentary[u'IdentificacaoParlamentar'][u'NomeCompletoParlamentar'])))
-
-            p_identification = get_parliamentary_identification(parliamentary)
-            parliamentary = Parliamentary.objects.filter(identification=p_identification)
-
-            if not parliamentary:
-                parliamentary = Parliamentary(identification=p_identification)
-            else:
-                parliamentary = parliamentary[0]
-
-            parliamentary.save()
-
+                self.style.SUCCESS(unicode(el[u'IdentificacaoParlamentar'][u'NomeCompletoParlamentar'])))
+            save_parliamentary(el)

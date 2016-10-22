@@ -21,3 +21,10 @@ class OpenDataRequests:
             'http://legis.senado.leg.br/dadosabertos/senador/lista/atual',
             {'Accept': 'Application/json'}
         )
+
+    @staticmethod
+    def get_parliamentary_json(code):
+        return OpenDataRequests.request(
+            'http://legis.senado.leg.br/dadosabertos/senador/' + code,
+            {'Accept': 'Application/json'}
+        )
