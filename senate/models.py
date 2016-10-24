@@ -21,12 +21,14 @@ class Parliamentary(models.Model):
     phone = models.CharField(max_length=100, null=True)
     fax = models.CharField(max_length=100, null=True)
 
+    open_data_url = models.URLField(null=True)
+
     def __unicode__(self):
         id = ParliamentaryIdentification.objects.get(parliamentary=self)
         return unicode(id.name)
 
 
-class Matters(models.Model):
+class Matter(models.Model):
     parliamentary = models.ForeignKey(Parliamentary, null=True)
 
     code = models.IntegerField()
@@ -50,10 +52,19 @@ class Commission(models.Model):
     name = models.CharField(max_length=200)
     house = models.CharField(max_length=200)
     participation_description = models.CharField(max_length=200)
-    start_date = models.CharField(max_length=200)
+    start_date = models.CharField(max_length=200, null=True)
 
     def __unicode__(self):
         return self.name
+
+
+class Report(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
+
+    matter = models.ForeignKey(Matter)
+    commission = models.ForeignKey(Commission)
+    type_description = models.CharField(max_length=100)
+    date_designation = models.DateField()
 
 
 class ParliamentaryIdentification(models.Model):
@@ -133,3 +144,26 @@ class PoliticalParty(models.Model):
 
     def __unicode__(self):
         return str(self.code)
+
+
+class Responsibility(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
+
+    commission = models.ForeignKey(Commission, null=True)
+    code = models.IntegerField()
+    description = models.CharField(max_length=200)
+    start_date = models.DateField()
+
+    def __unicode__(self):
+        return self.description
+
+
+class OtherInformation(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
+
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=300)
+    url = models.URLField()
+
+    def __unicode__(self):
+        return self.description

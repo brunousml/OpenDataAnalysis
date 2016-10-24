@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from data.OpenDataParliamentary import OpenDataParliamentaryBrJsonParser
 from senate.models import Parliamentary, ParliamentaryIdentification, State, ActualMandate, Legislature, Alternate, \
-    Exercise, PoliticalParty, Commission, Matters
+    Exercise, PoliticalParty, Commission, Matter, Report, Responsibility, OtherInformation
 
 
 def get_state(parser, node, field):
@@ -130,42 +130,93 @@ def add_parliamentary_political_party(open_data, parliamentary):
     return pp[0]
 
 
-def add_parliamentary_commissions(open_data, parliamentary):
-    if 'MembroAtualComissoes' in open_data.parliamentary:
-        commissions = open_data.parliamentary['MembroAtualComissoes']['Comissao']
-        for com in commissions:
+def get_or_create_commissions(content, parliamentary):
+    for com in content:
+        if type(content) == dict:
+            ident = content
+            com = {'DescricaoParticipacao': '', 'DataInicio': ''}
+        else:
             ident = com['IdentificacaoComissao']
-            commission = Commission.objects.get_or_create(
-                code=ident['CodigoComissao'],
-                slug=ident['SiglaComissao'],
-                name=ident['NomeComissao'],
-                house=ident['NomeCasaComissao'],
-                participation_description=com['DescricaoParticipacao'],
-                start_date=com['DataInicio'],
-            )
 
-            commission[0].parliamentary.add(parliamentary)
-            commission[0].save()
+        commission = Commission.objects.get_or_create(
+            code=ident['CodigoComissao'],
+            slug=ident['SiglaComissao'],
+            name=ident['NomeComissao'],
+            house=ident['NomeCasaComissao'],
+            participation_description=com['DescricaoParticipacao'],
+            start_date=com['DataInicio'],
+        )
+
+        commission[0].parliamentary.add(parliamentary)
+        commission[0].save()
+
+        if len(content) == 5 and not 'DescricaoTipoRelator' in content:
+            return commission[0]
+
+    return commission[0]
 
 
-def add_parliamentary_matters(open_data, parliamentary):
-    if 'MateriasDeAutoriaTramitando' in open_data.parliamentary:
-        mats = open_data.parliamentary['MateriasDeAutoriaTramitando']['Materia']
-        for mat in mats:
-            if mat == "EmentaMateria":
-                mat = mats
-            ident = mat['IdentificacaoMateria']
-            matter = Matters.objects.get_or_create(
-                code=int(ident['CodigoMateria']),
-                house_slug=ident['SiglaCasaIdentificacaoMateria'],
-                house=ident['NomeCasaIdentificacaoMateria'],
-                subtype_slug=ident['SiglaSubtipoMateria'],
-                subtype=ident['DescricaoSubtipoMateria'],
-                number=ident['NumeroMateria'],
-                year=int(ident['AnoMateria']),
-                entry=mat['EmentaMateria'],
-                parliamentary=parliamentary
-            )
+def get_or_create_matters(content, parliamentary):
+    for mat in content:
+        if mat == "EmentaMateria" or mat == "IdentificacaoMateria":
+            mat = content
+        ident = mat['IdentificacaoMateria']
+        matter = Matter.objects.get_or_create(
+            code=int(ident['CodigoMateria']),
+            house_slug=ident['SiglaCasaIdentificacaoMateria'],
+            house=ident['NomeCasaIdentificacaoMateria'],
+            subtype_slug=ident['SiglaSubtipoMateria'],
+            subtype=ident['DescricaoSubtipoMateria'],
+            number=ident['NumeroMateria'],
+            year=int(ident['AnoMateria']),
+            entry=mat['EmentaMateria'],
+            parliamentary=parliamentary
+        )
+    return matter[0]
+
+
+def get_or_create_reports(content, parliamentary):
+    for rep in content:
+        if type(content) == dict:
+            rep = content
+        matter = get_or_create_matters(rep['Materia'], parliamentary)
+        commission = get_or_create_commissions(rep['IdentificacaoComissao'], parliamentary)
+        report = Report.objects.get_or_create(
+            parliamentary=parliamentary,
+            matter=matter,
+            commission=commission,
+            type_description=rep['DescricaoTipoRelator'],
+            date_designation=rep['DataDesignacao']
+        )
+    return report[0]
+
+
+def get_or_create_responsibility(content, parliamentary):
+    for res in content:
+        if type(content) == dict:
+            res = content
+        commission = get_or_create_commissions(res['IdentificacaoComissao'], parliamentary)
+        responsibility = Responsibility.objects.get_or_create(
+            parliamentary=parliamentary,
+            commission=commission,
+            code=res['CodigoCargo'],
+            description=res['DescricaoCargo'],
+            start_date=res['DataInicio']
+        )
+    return responsibility[0]
+
+
+def get_or_create_other_information(content, parliamentary):
+    for oi in content:
+        if type(content) == dict:
+            oi = content
+        other_information = OtherInformation.objects.get_or_create(
+            parliamentary=parliamentary,
+            name=oi['NomeServico'],
+            description=oi['DescricaoServico'],
+            url=oi['UrlServico']
+        )
+    return other_information[0]
 
 
 def save_parliamentary(el):
@@ -181,14 +232,28 @@ def save_parliamentary(el):
     parliamentary.phone = open_data.get_parliamentary_basic_data('TelefoneParlamentar')
     parliamentary.fax = open_data.get_parliamentary_basic_data('FaxParlamentar')
     parliamentary.birth_date = open_data.get_parliamentary_basic_data('DataNascimento')
+    parliamentary.open_data_url = open_data.get_parliamentary_basic_data('UrlGlossario')
     parliamentary.save()
 
     # Foreign Keys
     add_parliamentary_identification(open_data, parliamentary)
     add_parliamentary_actual_mandate(open_data, parliamentary)
     add_parliamentary_political_party(open_data, parliamentary)
-    add_parliamentary_commissions(open_data, parliamentary)
-    add_parliamentary_matters(open_data, parliamentary)
+
+    if 'MembroAtualComissoes' in open_data.parliamentary:
+        get_or_create_commissions(open_data.parliamentary['MembroAtualComissoes']['Comissao'], parliamentary)
+
+    if 'MateriasDeAutoriaTramitando' in open_data.parliamentary:
+        get_or_create_matters(open_data.parliamentary['MateriasDeAutoriaTramitando']['Materia'], parliamentary)
+
+    if 'RelatoriasAtuais' in open_data.parliamentary:
+        get_or_create_reports(open_data.parliamentary['RelatoriasAtuais']['Relatoria'], parliamentary)
+
+    if 'CargosAtuais' in open_data.parliamentary:
+        get_or_create_responsibility(open_data.parliamentary['CargosAtuais']['CargoAtual'], parliamentary)
+
+    if 'OutrasInformacoes' in open_data.parliamentary:
+        get_or_create_other_information(open_data.parliamentary['OutrasInformacoes']['Servico'], parliamentary)
 
 
 class Command(BaseCommand):
