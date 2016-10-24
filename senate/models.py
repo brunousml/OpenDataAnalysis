@@ -13,7 +13,52 @@ class State(models.Model):
         return self.slug
 
 
+class Parliamentary(models.Model):
+    code = models.IntegerField()
+    birth_date = models.DateField(null=True)
+    natural_state = models.ForeignKey(State, null=True)
+    address = models.TextField(null=True)
+    phone = models.CharField(max_length=100, null=True)
+    fax = models.CharField(max_length=100, null=True)
+
+    def __unicode__(self):
+        id = ParliamentaryIdentification.objects.get(parliamentary=self)
+        return unicode(id.name)
+
+
+class Matters(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
+
+    code = models.IntegerField()
+    house_slug = models.SlugField()
+    house = models.CharField(max_length=100)
+    subtype_slug = models.SlugField()
+    subtype = models.CharField(max_length=100)
+    number = models.CharField(max_length=50)
+    year = models.IntegerField()
+    entry = models.TextField()
+
+    def __unicode__(self):
+        return self.entry
+
+
+class Commission(models.Model):
+    parliamentary = models.ManyToManyField(Parliamentary)
+
+    code = models.IntegerField()
+    slug = models.SlugField()
+    name = models.CharField(max_length=200)
+    house = models.CharField(max_length=200)
+    participation_description = models.CharField(max_length=200)
+    start_date = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.name
+
+
 class ParliamentaryIdentification(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
+
     state = models.ForeignKey(State, null=True, default=None)
 
     code = models.IntegerField(unique=True)
@@ -31,56 +76,60 @@ class ParliamentaryIdentification(models.Model):
         return self.name
 
 
+class ActualMandate(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
+    code = models.IntegerField()
+    participation_description = models.CharField(max_length=100)
+
+    state = models.ForeignKey(State, null=True)
+
+    def __unicode__(self):
+        return str(self.code)
+
+
 class Legislature(models.Model):
+    actual_mandate = models.ForeignKey(ActualMandate, null=True)
+
     number = models.IntegerField()
     start_date = models.DateField()
     end_date = models.DateField()
 
     def __unicode__(self):
-        return self.code
+        return str(self.number)
 
 
 class Exercise(models.Model):
+    actual_mandate = models.ForeignKey(ActualMandate, null=True)
+
     code = models.IntegerField()
     start_date = models.DateField()
-    end_date = models.DateField()
+
+    end_date = models.DateField(null=True)
+    abbreviation_cause_expulsion = models.CharField(max_length=10, null=True)
+    description_cause_expulsion = models.CharField(max_length=10, null=True)
 
     def __unicode__(self):
-        return self.code
+        return str(self.code)
 
 
 class Alternate(models.Model):
+    actual_mandate = models.ForeignKey(ActualMandate, null=True)
+
     participation_description = models.CharField(max_length=100)
     code = models.IntegerField()
     name = models.CharField(max_length=200)
 
     def __unicode__(self):
-        return self.code
+        return str(self.code)
 
 
-class ActualMandate(models.Model):
-    legislature = models.ForeignKey(Legislature)
-    alternates = models.ForeignKey(Alternate)
-    exercises = models.ForeignKey(Exercise)
+class PoliticalParty(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
 
-    state = models.ForeignKey(State)
-
+    name = models.CharField(max_length=100)
+    slug = models.SlugField()
     code = models.IntegerField()
-    participation_description = models.CharField(max_length=100)
+    membership_date = models.DateField()
 
     def __unicode__(self):
-        return self.code
-
-
-class Parliamentary(models.Model):
-    identification = models.OneToOneField(ParliamentaryIdentification)
-    actual_mandate = models.OneToOneField(ActualMandate, null=True, blank=True)
-
-    birth_date = models.DateField(null=True)
-    natural_state = models.ForeignKey(State, null=True)
-    address = models.TextField(null=True)
-    phone = models.CharField(max_length=100, null=True)
-    fax = models.CharField(max_length=100, null=True)
-
-    def __unicode__(self):
-        return unicode(self.identification.name)
+        return str(self.code)
