@@ -1,3 +1,4 @@
+
 import urllib2
 import xmltodict
 
@@ -5,20 +6,22 @@ from django.shortcuts import render
 
 
 def index(request):
-    return render(request, 'charts/base_2.html')
+    return render(request, 'senate/index.html')
 
 
-def senadores(request):
-    return render(request, 'charts/senadores.html')
+def parliamentarians(request):
+    context = {'title': 'Lista de Parlamentares'}
+    return render(request=request, template_name='senate/parliamentarians.html', context=context)
 
 
 def pecs(request):
     data = getXML('http://www.senado.leg.br/rss/projetospecssenadores.xml')
     context = {
         'channel': data['rss']['channel'],
-        'data': data
+        'data': data,
+        'title': 'Lista de PECs no Senado Federal'
     }
-    return render(request=request, template_name='charts/pecs.html', context=context)
+    return render(request=request, template_name='senate/pecs.html', context=context)
 
 
 def getUpdates(request):

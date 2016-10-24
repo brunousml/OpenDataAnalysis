@@ -1,5 +1,5 @@
 """
-WSGI config for senadorAnalytics project.
+WSGI config for OpenDataAnalysis project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "senadorAnalytics.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "OpenDataAnalysis.settings")
 
 application = get_wsgi_application()
