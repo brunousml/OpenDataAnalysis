@@ -8,6 +8,10 @@ from senate.tastypieResources import *
 v1_api = Api(api_name='v1')
 v1_api.register(ParliamentaryResource())
 v1_api.register(StateResource())
+v1_api.register(MatterResource())
+v1_api.register(CommissionResource())
+v1_api.register(ReportResource())
+v1_api.register(ParliamentaryIdentificationResource())
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
