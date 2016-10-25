@@ -1,5 +1,3 @@
-import inspect
-
 from django.forms.models import model_to_dict
 from tastypie import fields
 from tastypie.resources import ModelResource
@@ -7,17 +5,14 @@ from .models import *
 
 
 class StateResource(ModelResource):
-    parliamentary = fields.ToManyField('senate.tastypieResource.ParliamentaryResource',
-                                       'parliamentary', full=True)
-
     class Meta:
         queryset = State.objects.all()
         resource_name = 'state'
 
 
 class MatterResource(ModelResource):
-    parliamentary = fields.ToManyField('senate.tastypieResource.ParliamentaryResource',
-                                       'parliamentary', full=True)
+    parliamentary = fields.ToOneField('senate.tastypieResources.ParliamentaryResource',
+                                       'parliamentary', verbose_name='parliamentary')
 
     class Meta:
         queryset = Matter.objects.all()
@@ -25,8 +20,8 @@ class MatterResource(ModelResource):
 
 
 class CommissionResource(ModelResource):
-    parliamentary = fields.ToManyField('senate.tastypieResource.ParliamentaryResource',
-                                       'parliamentary', full=True)
+    parliamentary = fields.ToManyField('senate.tastypieResources.ParliamentaryResource',
+                                       'parliamentary', verbose_name='parliamentary')
 
     class Meta:
         queryset = Commission.objects.all()
@@ -34,8 +29,8 @@ class CommissionResource(ModelResource):
 
 
 class ReportResource(ModelResource):
-    parliamentary = fields.ToManyField('senate.tastypieResource.ParliamentaryResource',
-                                       'parliamentary', full=True)
+    parliamentary = fields.ToOneField('senate.tastypieResources.ParliamentaryResource',
+                                      'parliamentary', verbose_name='parliamentary')
 
     class Meta:
         queryset = Report.objects.all()
@@ -43,8 +38,8 @@ class ReportResource(ModelResource):
 
 
 class ParliamentaryIdentificationResource(ModelResource):
-    parliamentary = fields.ToManyField('senate.tastypieResource.ParliamentaryResource',
-                                       'parliamentary', full=True)
+    parliamentary = fields.ToOneField('senate.tastypieResources.ParliamentaryResource',
+                                      'parliamentary', verbose_name='parliamentary')
 
     class Meta:
         queryset = Report.objects.all()
@@ -52,12 +47,11 @@ class ParliamentaryIdentificationResource(ModelResource):
 
 
 class ParliamentaryResource(ModelResource):
+    commissions = fields.ToManyField(CommissionResource, 'commissions', verbose_name='commissions', null=True)
     natural_state = fields.ForeignKey(StateResource, 'state', verbose_name='natural_state', null=True, full=True)
     identification = fields.ForeignKey(ParliamentaryIdentificationResource, 'identification',
-                                       verbose_name='identification', null=True, full=True)
+                                       verbose_name='identification', null=True)
     matters = fields.ManyToManyField(MatterResource, 'matters', verbose_name='matters', null=True, full=True)
-    commissions = fields.ManyToManyField(CommissionResource, 'commissions', verbose_name='commissions', null=True,
-                                         full=True)
     reports = fields.ManyToManyField(Report, 'reports', verbose_name='reports', null=True, full=True)
 
     class Meta:
