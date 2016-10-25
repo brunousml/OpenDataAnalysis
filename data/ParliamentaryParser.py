@@ -226,7 +226,7 @@ class OpenDataParliamentariansParser(object):
         parliamentary.phone = open_data.get_parliamentary_basic_data('TelefoneParlamentar')
         parliamentary.fax = open_data.get_parliamentary_basic_data('FaxParlamentar')
         parliamentary.birth_date = open_data.get_parliamentary_basic_data('DataNascimento')
-        parliamentary.open_data_url = open_data.get_parliamentary_basic_data('UrlGlossario')
+        parliamentary.open_data_url = open_data.parliamentary['UrlGlossario'] + open_data.parliamentary['IdentificacaoParlamentar']['CodigoParlamentar']
         parliamentary.save()
 
         # Foreign Keys
