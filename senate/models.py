@@ -14,13 +14,13 @@ class State(models.Model):
 
 
 class Parliamentary(models.Model):
+    natural_state = models.ForeignKey(State, null=True)
+
     code = models.IntegerField()
     birth_date = models.DateField(null=True)
-    natural_state = models.ForeignKey(State, null=True)
     address = models.TextField(null=True)
     phone = models.CharField(max_length=100, null=True)
     fax = models.CharField(max_length=100, null=True)
-
     open_data_url = models.URLField(null=True)
 
     def __unicode__(self):
