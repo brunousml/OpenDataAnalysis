@@ -1,6 +1,5 @@
 var Parliamentary = React.createClass({
     render: function(){
-        console.log(this.props.p);
         return(
             <div className="col-md-3 col-sm-20 hero-feature" style={{'height':'700px'}} >
                 <div className="thumbnail" >
@@ -64,7 +63,7 @@ var Parliamentarians = React.createClass({
     return (
         <div className="row">
             <div id="loading" style={style} className="col-lg-20">
-               <p>Aguarde enquanto processo sua solicitaçao.</p>
+               <p>Estamos coletando dados públicos. Isto pode demorar alguns minutos.</p>
                 <img src="/static/senate/img/loading.gif"  />
             </div>
 
@@ -76,6 +75,6 @@ var Parliamentarians = React.createClass({
 });
 
 ReactDOM.render(
-  <Parliamentarians  url='http://104.236.214.85/api/v1/parliamentary?format=jsonp&limit=200'/>,
+  <Parliamentarians  url='http://104.236.214.85/api/v1/parliamentary?format=jsonp&limit=50'/>,
   document.getElementById('to-render')
 );
