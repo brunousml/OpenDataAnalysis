@@ -76,6 +76,6 @@ var Parliamentarians = React.createClass({
 });
 
 ReactDOM.render(
-  <Parliamentarians  url='http://localhost:8000/api/v1/parliamentary?format=jsonp&limit=200'/>,
+  <Parliamentarians  url='http://104.236.214.85/api/v1/parliamentary?format=jsonp&limit=200'/>,
   document.getElementById('to-render')
 );
