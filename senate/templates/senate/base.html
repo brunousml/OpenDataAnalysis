@@ -112,9 +112,18 @@
 
     <!-- jQuery -->
     <script src="{% static 'senate/js/lib/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'senate/js/lib/jquery/jquery-ui.min.js' %}" ></script>
+    <script src="{% static 'senate/js/lib/noty/packaged/jquery.noty.packaged.min.js' %}" ></script>
+
+    <!-- React -->
+    <script src="{% static 'senate/js/lib/react/build/react.js' %}" ></script>
+    <script src="{% static 'senate/js/lib/react/build/react-dom.js' %}" ></script>
+    <script src="{% static 'senate/js/lib/react/browser.min.js' %}" ></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="{% static 'senate/js/lib/bootstrap/bootstrap.min.js' %}"></script>
+
+    <!-- Dynamic Js-->
     {% block js %}{% endblock %}
 </body>
 

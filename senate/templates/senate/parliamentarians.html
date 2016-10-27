@@ -2,29 +2,28 @@
 {% load static %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-md-10">
-            <h1 class="page-header">Senadores em Exercício</h1>
-            <small><a href="" target="_blank">Fonte</a> dos dados</small>
+<style>.img-center {margin: 0 auto;}footer {margin: 50px 0;}</style>
+
+    <div class="container">
+        <!-- Introduction Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Parlamentares
+                    <small>Dados do Senado</small>
+                </h1>
+                <!--<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint, explicabo dolores ipsam aliquam inventore corrupti eveniet quisquam quod totam laudantium repudiandae obcaecati ea consectetur debitis velit facere nisi expedita vel?</p>-->
+            </div>
         </div>
-    </div>
-    <div id="ajax-content">
-        <div id="loading" style="margin: 0 auto; max-width:50%; text-align: center;">
-            <p>Estamos coletando dados abertos disponiveis em
-                <a href="http://dadosabertos.senado.leg.br/">http://dadosabertos.senado.leg.br/</a> </p>
-            <img src="{% static 'senate/img/loading.gif' %}" />
-        </div>
+
+        <!-- Team Members Row -->
+        <div id="to-render"></div>
+
+
     </div>
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'senate/js/build/app.js' %}"></script>
-
-<script>
-    $(document).ready(function(){
-        renderSenadores();
-    });
-</script>
+    <script type="text/babel" src="{% static 'senate/js/react-components/parliamentary.js' %}"></script>
 {% endblock %}
 
 
