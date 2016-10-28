@@ -1,7 +1,10 @@
 var Parliamentary = React.createClass({
+    redirect: function(){
+        location.href = '/parliamentary/profile/' + this.props.p.code;
+    },
     render: function(){
         return(
-            <div className="col-md-3 col-sm-20 hero-feature" style={{'height':'600px'}} >
+            <div className="col-md-3 col-sm-50 hero-feature" style={{'minHeight':'600px', 'cursor': 'pointer'}} onClick={this.redirect} >
                 <div className="thumbnail" >
                     <img src={this.props.p.url_photo} style={{'width':'100%'}} alt="" />
                     <div className="caption">
