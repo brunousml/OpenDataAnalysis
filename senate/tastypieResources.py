@@ -12,7 +12,7 @@ class StateResource(ModelResource):
 
 class MatterResource(ModelResource):
     parliamentary = fields.ToOneField('senate.tastypieResources.ParliamentaryResource',
-                                       'parliamentary', verbose_name='parliamentary')
+                                      'parliamentary', verbose_name='parliamentary')
 
     class Meta:
         queryset = Matter.objects.all()
@@ -39,32 +39,25 @@ class ReportResource(ModelResource):
 
 class ParliamentaryIdentificationResource(ModelResource):
     parliamentary = fields.ToOneField('senate.tastypieResources.ParliamentaryResource',
-                                      'parliamentary', verbose_name='parliamentary')
+                                      'parliamentary', verbose_name='parliamentary', full=True)
+
+    state = fields.ToOneField('senate.tastypieResources.StateResource',
+                              'state', verbose_name='state', full=True)
 
     class Meta:
-        queryset = Report.objects.all()
+        queryset = ParliamentaryIdentification.objects.all()
         resource_name = 'identification'
 
 
 class ParliamentaryResource(ModelResource):
-    # commissions = fields.ToManyField(CommissionResource, 'commissions', verbose_name='commissions', null=True)
-    natural_state = fields.ForeignKey(StateResource, 'state', verbose_name='natural_state', null=True, full=True)
-    identification = fields.ForeignKey(ParliamentaryIdentificationResource, 'identification',
-                                       verbose_name='identification', null=True)
-    # matters = fields.ManyToManyField(MatterResource, 'matters', verbose_name='matters', null=True, full=True)
-    # reports = fields.ManyToManyField(Report, 'reports', verbose_name='reports', null=True, full=True)
+    natural_state = fields.ToOneField(StateResource, 'natural_state', verbose_name='natural_state', null=True, full=True)
 
     class Meta:
         queryset = Parliamentary.objects.all()
         resource_name = 'parliamentary'
 
     def dehydrate(self, bundle):
-        # bundle = self.append_matters(bundle)
-        # bundle = self.append_commissions(bundle)
-        # bundle = self.append_reports(bundle)
-
-        bundle.data['natural_state'] = model_to_dict(bundle.obj.natural_state)
-        bundle.data['identification'] = model_to_dict(ParliamentaryIdentification.objects.get(parliamentary=bundle.obj.id))
+        # bundle.data['natural_state'] = model_to_dict(bundle.obj.natural_state)
         return bundle
 
     def append_object(self, object, field, bundle):
@@ -82,4 +75,3 @@ class ParliamentaryResource(ModelResource):
 
     def append_reports(self, bundle):
         return self.append_object(Report, 'reports', bundle)
-

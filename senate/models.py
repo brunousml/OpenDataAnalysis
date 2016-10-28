@@ -15,7 +15,6 @@ class State(models.Model):
 
 class Parliamentary(models.Model):
     natural_state = models.ForeignKey(State, null=True)
-
     code = models.IntegerField()
     birth_date = models.DateField(null=True)
     address = models.TextField(null=True)

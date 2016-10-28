@@ -3,13 +3,13 @@ var Parliamentary = React.createClass({
         return(
             <div className="col-md-3 col-sm-20 hero-feature" style={{'height':'600px'}} >
                 <div className="thumbnail" >
-                    <img src={this.props.p.identification.url_photo} style={{'width':'100%'}} alt="" />
+                    <img src={this.props.p.url_photo} style={{'width':'100%'}} alt="" />
                     <div className="caption">
-                        <h3>{this.props.p.identification.salutation} {this.props.p.identification.name}</h3>
+                        <h3>{this.props.p.salutation} {this.props.p.name}</h3>
                         <div className="info-p">
-                            <h4>Contatos:</h4>
-                            <p><strong>Telefone: </strong>: <br/>{this.props.p.phone}</p>
-                            <p><strong>Email: </strong>: <br/>{this.props.p.identification.email}</p>
+                            <h4>{this.props.p.acronym_party} / {this.props.p.state.slug}</h4>
+                            <p><strong>Fone: </strong> <br/>{this.props.p.parliamentary.phone}</p>
+                            <p><strong>Email: </strong> <br/>{this.props.p.email}</p>
                         </div>
                     </div>
                 </div>
@@ -69,6 +69,6 @@ var Parliamentarians = React.createClass({
 });
 
 ReactDOM.render(
-  <Parliamentarians  url='/api/v1/parliamentary?format=jsonp&limit=200'/>,
+  <Parliamentarians  url='/api/v1/identification?format=jsonp&limit=200'/>,
   document.getElementById('to-render')
 );
