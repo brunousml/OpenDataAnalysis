@@ -199,7 +199,7 @@ var Parliamentary = React.createClass({
                     </div>
                 </div>
 
-                <div className="col-lg-4">
+                <div className="col-lg-8">
                     <div className="panel panel-default">
                         <div className="panel-heading">
                             Comissões
