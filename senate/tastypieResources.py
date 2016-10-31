@@ -82,6 +82,9 @@ class ReportResource(ModelResource):
     class Meta:
         queryset = Report.objects.all()
         resource_name = 'report'
+        filtering = {
+            'parliamentary': ALL_WITH_RELATIONS
+        }
 
 
 class ParliamentaryIdentificationResource(ModelResource):

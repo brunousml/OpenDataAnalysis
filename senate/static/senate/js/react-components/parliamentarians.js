@@ -4,13 +4,14 @@ var Parliamentary = React.createClass({
     },
     render: function(){
         return(
-            <div className="col-md-3 col-sm-50 hero-feature" style={{'minHeight':'600px', 'cursor': 'pointer'}} onClick={this.redirect} >
+            <div className="col-md-3 col-sm-20 hero-feature" style={{'height':'650px', 'cursor': 'pointer'}} onClick={this.redirect} >
                 <div className="thumbnail" >
                     <img src={this.props.p.url_photo} style={{'width':'100%'}} alt="" />
                     <div className="caption">
-                        <h3>{this.props.p.salutation} {this.props.p.name}</h3>
+                        <h3 className='name'>{this.props.p.salutation} {this.props.p.name}</h3>
                         <div className="info-p">
-                            <h4>{this.props.p.acronym_party} / {this.props.p.state.slug}</h4>
+                            <h4 className='acronym'><b>Partido:</b>{this.props.p.acronym_party}</h4>
+                            <p className="state"><b>Estado:</b> {this.props.p.state.slug}</p>
                             <p><strong>Fone: </strong> <br/>{this.props.p.parliamentary.phone}</p>
                             <p><strong>Email: </strong> <br/>{this.props.p.email}</p>
                         </div>
@@ -25,11 +26,12 @@ var Parliamentarians = React.createClass({
 
   getInitialState: function() {
     return {
-      parliamentarians: []
+      parliamentarians: [],
+      search_value: ''
     }
   },
 
-  componentDidMount: function() {
+  componentWillMount:function(){
     $.ajax({
       url: this.props.url,
       dataType: "jsonp",
@@ -44,28 +46,42 @@ var Parliamentarians = React.createClass({
     });
   },
 
-  componentWillount:function(){
-    return true;
+  search: function(el){
+        this.setState({search_value: el.target.value.toLowerCase()});
   },
 
   render: function() {
 
     var parliamentarians = this.state.parliamentarians.map(
                 function(parliamentary, current){
-                    return <Parliamentary p={parliamentary} key={parliamentary.id} />
-            });
+                    var p = <li key={parliamentary.id}><Parliamentary p={parliamentary} key={parliamentary.id} /></li>;
+                    if( this.state.search_value.length == 0
+                        || parliamentary.name.toLowerCase().indexOf(this.state.search_value) != -1
+                            || parliamentary.acronym_party.toLowerCase().indexOf(this.state.search_value) != -1
+                                || parliamentary.state.slug.toLowerCase().indexOf(this.state.search_value) != -1 ){
+
+                        return p;
+                    }
+                }.bind(this)
+    );
 
     var style = {'margin': '0 auto', 'maxWidth':'50%','textAlign': 'center'}
 
     return (
         <div className="row">
-            <div id="loading" style={style} className="col-lg-20">
-               <p>Estamos coletando dados públicos. Isto pode demorar alguns minutos.</p>
-                <img src="/static/senate/img/loading.gif"  />
-            </div>
+              <div className="col-lg-20">
+                <strong> Busca: </strong>
+                <input className="search " type="text" value={this.state.input_value}  onChange={this.search} placeholder="Renan" />
+                <hr/>
+              </div>
 
-
-            {parliamentarians}
+              <div id="loading" style={style} className="col-lg-20">
+                   <p>Estamos coletando dados públicos. Isto pode demorar alguns minutos.</p>
+                    <img src="/static/senate/img/loading.gif"  />
+              </div>
+              <ul style={{'listStyle': 'none','padding': '0'}} className="parliamentarians">
+                {parliamentarians}
+              </ul>
         </div>
     )
   }

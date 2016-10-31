@@ -7,7 +7,7 @@ var Reports = React.createClass({
 
     componentDidMount: function() {
         $.ajax({
-          url: '/api/v1/report/',
+          url: '/api/v1/report/?limit=99&parliamentary__code=' + this.props.code,
           dataType: "jsonp",
           cache: false,
           success: function(data) {
@@ -54,7 +54,7 @@ var Commissions = React.createClass({
 
     componentDidMount: function() {
         $.ajax({
-          url: '/api/v1/commission/?parliamentary__code=' + this.props.code,
+          url: '/api/v1/commission/?limit=99&parliamentary__code=' + this.props.code,
           dataType: "jsonp",
           cache: false,
           success: function(data) {
@@ -102,7 +102,7 @@ var Matters = React.createClass({
 
     componentDidMount: function() {
         $.ajax({
-          url: '/api/v1/matter/?identification__code=' + this.props.code,
+          url: '/api/v1/matter/?limit=99&&dentification__code=' + this.props.code,
           dataType: "jsonp",
           cache: false,
           success: function(data) {
@@ -177,18 +177,7 @@ var Parliamentary = React.createClass({
                     </div>
                 </div>
 
-                <div className="col-lg-8">
-                    <div className="panel panel-default">
-                        <div className="panel-heading">
-                            Relatórios
-                        </div>
-                        <div className="panel-body">
-                            <Reports code={this.props.p.code} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-lg-4">
+                <div className="col-lg-6">
                     <div className="panel panel-default">
                         <div className="panel-heading">
                             Matérias
@@ -199,7 +188,7 @@ var Parliamentary = React.createClass({
                     </div>
                 </div>
 
-                <div className="col-lg-8">
+                <div className="col-lg-4">
                     <div className="panel panel-default">
                         <div className="panel-heading">
                             Comissões
@@ -210,7 +199,16 @@ var Parliamentary = React.createClass({
                     </div>
                 </div>
 
-
+                <div className="col-lg-4">
+                    <div className="panel panel-default">
+                        <div className="panel-heading">
+                            Relatórios
+                        </div>
+                        <div className="panel-body">
+                            <Reports code={this.props.p.code} />
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }
@@ -265,7 +263,7 @@ var Parliamentarians = React.createClass({
   }
 });
 
-var url = '/api/v1/identification?code=' + $('#code').html();
+var url = '/api/v1/identification?limit=999&code=' + $('#code').html();
 ReactDOM.render(
   <Parliamentarians  url={url}/>,
   document.getElementById('to-render')

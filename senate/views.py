@@ -12,6 +12,7 @@ def index(request):
 def parliamentarians(request):
     context = {'title': 'Lista de Parlamentares'}
     return render(request=request, template_name='senate/parliamentarians.html', context=context)
+    # return render(request=request, template_name='senate/parliamentarians.html', context=context)
 
 
 def parliamentary_profile(request, code):
