@@ -5,7 +5,7 @@ var Reports = React.createClass({
         }
     },
 
-    componentDidMount: function() {
+    componentWillMount: function() {
         $.ajax({
           url: '/api/v1/report/?limit=99&parliamentary__code=' + this.props.code,
           dataType: "jsonp",
@@ -18,10 +18,6 @@ var Reports = React.createClass({
             console.error(this.props.url, status, err.toString());
           }.bind(this)
         });
-    },
-
-    componentWillMount:function(){
-        return true;
     },
 
     render: function(){
@@ -52,7 +48,7 @@ var Commissions = React.createClass({
         }
     },
 
-    componentDidMount: function() {
+    componentWillMount: function() {
         $.ajax({
           url: '/api/v1/commission/?limit=99&parliamentary__code=' + this.props.code,
           dataType: "jsonp",
@@ -65,10 +61,6 @@ var Commissions = React.createClass({
             console.error(this.props.url, status, err.toString());
           }.bind(this)
         });
-    },
-
-    componentWillMount:function(){
-        return true;
     },
 
     render: function(){
@@ -100,7 +92,7 @@ var Matters = React.createClass({
         }
     },
 
-    componentDidMount: function() {
+    componentWillMount: function() {
         $.ajax({
           url: '/api/v1/matter/?limit=99&&dentification__code=' + this.props.code,
           dataType: "jsonp",
@@ -113,10 +105,6 @@ var Matters = React.createClass({
             console.error(this.props.url, status, err.toString());
           }.bind(this)
         });
-    },
-
-    componentWillMount:function(){
-        return true;
     },
 
     redirect: function(){
@@ -159,11 +147,55 @@ var Matter = React.createClass({
     }
 });
 
+
+var ActualMandate = React.createClass({
+    getInitialState: function() {
+        return {
+          mandate: []
+        }
+    },
+
+    componentWillMount:function(){
+        $.ajax({
+          url: '/api/v1/mandate/1?limit=999&parliamentary__code=' + this.props.code,
+          dataType: "jsonp",
+          cache: false,
+          success: function(data) {
+            this.setState({mandate: data});
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
+    },
+
+    render: function(){
+        var start = (this.state.mandate.legislature) ? this.state.mandate.legislature[0].start_date : '';
+        var end = (this.state.mandate.legislature) ? this.state.mandate.legislature[1].end_date : '';
+
+        var first_alter = (this.state.mandate.alternate) ? this.state.mandate.alternate[0]: [];
+        var second_alter = (this.state.mandate.alternate) ? this.state.mandate.alternate[1]: [];
+
+        return (
+            <div className='mandate'>
+                <div className="col-md-9">
+                    <h2>{this.state.mandate.participation_description} <small>{start} - {end}</small></h2>
+                    <p>Suplentes: </p>
+                    <ul>
+                        <li>{first_alter.participation_description}: {first_alter.name}</li>
+                        <li>{second_alter.participation_description}: {second_alter.name}</li>
+                    </ul>
+                </div>
+            </div>
+        )
+    }
+});
+
 var Parliamentary = React.createClass({
     render: function(){
         return(
             <div className='tt'>
-                <div className="col-md-3 col-sm-50 hero-feature" style={{'minHeight':'600px', 'cursor': 'pointer'}} >
+                <div className="col-md-3 col-sm-50 hero-feature" >
                     <div className="thumbnail" >
                         <img src={this.props.p.url_photo} style={{'width':'100%'}} alt="" />
                         <div className="caption">
@@ -176,36 +208,24 @@ var Parliamentary = React.createClass({
                         </div>
                     </div>
                 </div>
+                <div className="col-lg-9">
+                    <div className="panel panel-default">
+                        <div className="panel-heading">
+                            Mandato
+                        </div>
+                        <div className="panel-body">
+                            <ActualMandate code={this.props.p.code} />
+                        </div>
+                    </div>
+                </div>
 
-                <div className="col-lg-6">
+                <div className="col-lg-9">
                     <div className="panel panel-default">
                         <div className="panel-heading">
                             Matérias
                         </div>
                         <div className="panel-body">
                             <Matters code={this.props.p.code} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-lg-4">
-                    <div className="panel panel-default">
-                        <div className="panel-heading">
-                            Comissões
-                        </div>
-                        <div className="panel-body">
-                            <Commissions code={this.props.p.code} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-lg-4">
-                    <div className="panel panel-default">
-                        <div className="panel-heading">
-                            Relatórios
-                        </div>
-                        <div className="panel-body">
-                            <Reports code={this.props.p.code} />
                         </div>
                     </div>
                 </div>
@@ -222,7 +242,7 @@ var Parliamentarians = React.createClass({
     }
   },
 
-  componentDidMount: function() {
+  componentWillMount: function() {
     $.ajax({
       url: this.props.url,
       dataType: "jsonp",
@@ -235,10 +255,6 @@ var Parliamentarians = React.createClass({
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
-  },
-
-  componentWillMount:function(){
-    return true;
   },
 
   render: function() {

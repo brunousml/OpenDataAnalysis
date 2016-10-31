@@ -48,6 +48,9 @@ class MandateResource(ModelResource):
     alternate = fields.ToManyField('senate.tastypieResources.AlternateResource',
                                   'alternate', verbose_name='alternate', null=True)
 
+    state = fields.ToOneField('senate.tastypieResources.StateResource',
+                                   'state', verbose_name='state', null=True, full=True)
+
     class Meta:
         queryset = ActualMandate.objects.all()
         resource_name = 'mandate'
