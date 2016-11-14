@@ -1,10 +1,14 @@
 from data.OpenDataRequests import OpenDataRequests
 
 
-class OpenDataParliamentaryBrJsonParser:
+class OpenDataParliamentaryBrParser:
     def __init__(self):
         self.parliamentary = None
         pass
+
+    @staticmethod
+    def get_expenses():
+        return OpenDataRequests.expenses_csv()
 
     @staticmethod
     def get_parliamentarians():

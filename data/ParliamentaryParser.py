@@ -1,16 +1,32 @@
-from data.OpenDataParliamentary import OpenDataParliamentaryBrJsonParser
+from data.OpenDataParliamentary import OpenDataParliamentaryBrParser
 from senate.models import *
 
 
 class OpenDataParliamentariansParser(object):
     def dump(self):
-        parliamentarians = OpenDataParliamentaryBrJsonParser.get_parliamentarians()
+        self.save_parliamentary_expenses()  # second
+        self.save_parliamentarians()  # first
+
+    def save_parliamentary_expenses(self):
+        expenses = OpenDataParliamentaryBrParser.get_expenses()
+        for expense in expenses:
+            if len(expense) > 4:
+                parli = ParliamentaryIdentification.objects.filter(name=expense[02].decode("latin-1"))
+
+        return expenses
+
+    def save_parliamentarians(self):
+        parliamentarians = OpenDataParliamentaryBrParser.get_parliamentarians()
         for el in parliamentarians:
             print unicode(
                 el[u'IdentificacaoParlamentar'][u'CodigoParlamentar'] + ' - ' + el[u'IdentificacaoParlamentar'][
                     u'NomeCompletoParlamentar'])
 
             self.save(el)
+
+        return parliamentarians
+
+
 
     def get_state(self, parser, node, field):
         state, create = State.objects.get_or_create(slug=parser.get_parliamentary_node_field(node, field))
@@ -214,7 +230,7 @@ class OpenDataParliamentariansParser(object):
         return other_information[0]
 
     def save(self, el):
-        open_data = OpenDataParliamentaryBrJsonParser()
+        open_data = OpenDataParliamentaryBrParser()
         open_data.get_parliamentary(el['IdentificacaoParlamentar']['CodigoParlamentar'])
 
         # Basic Information
