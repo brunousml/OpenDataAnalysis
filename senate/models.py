@@ -15,7 +15,6 @@ class State(models.Model):
 
 class Parliamentary(models.Model):
     natural_state = models.ForeignKey(State, null=True)
-
     code = models.IntegerField()
     birth_date = models.DateField(null=True)
     address = models.TextField(null=True)
@@ -60,16 +59,16 @@ class Commission(models.Model):
 
 class Report(models.Model):
     parliamentary = models.ForeignKey(Parliamentary, null=True)
-
     matter = models.ForeignKey(Matter)
     commission = models.ForeignKey(Commission)
+
     type_description = models.CharField(max_length=100)
     date_designation = models.DateField()
+    menu = models
 
 
 class ParliamentaryIdentification(models.Model):
     parliamentary = models.ForeignKey(Parliamentary, null=True)
-
     state = models.ForeignKey(State, null=True, default=None)
 
     code = models.IntegerField(unique=True)
@@ -96,6 +95,8 @@ class ActualMandate(models.Model):
 
     def __unicode__(self):
         return str(self.code)
+
+
 
 
 class Legislature(models.Model):

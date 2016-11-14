@@ -12,6 +12,15 @@ def index(request):
 def parliamentarians(request):
     context = {'title': 'Lista de Parlamentares'}
     return render(request=request, template_name='senate/parliamentarians.html', context=context)
+    # return render(request=request, template_name='senate/parliamentarians.html', context=context)
+
+
+def parliamentary_profile(request, code):
+    context = {
+        'code': code,
+        'title': 'Perfil Parlamentar'
+    }
+    return render(request=request, template_name='senate/parliamentary_profile.html', context=context)
 
 
 def pecs(request):
@@ -22,11 +31,6 @@ def pecs(request):
         'title': 'Lista de PECs no Senado Federal'
     }
     return render(request=request, template_name='senate/pecs.html', context=context)
-
-
-def getUpdates(request):
-    return False
-
 
 def getXML(url):
     file = urllib2.urlopen(url)
