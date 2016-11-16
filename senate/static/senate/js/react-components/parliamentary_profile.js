@@ -1,7 +1,8 @@
 var Expenses = React.createClass({
     getInitialState: function() {
         return {
-          data: {}
+          data: {},
+          display_list: false
         }
     },
 
@@ -20,21 +21,52 @@ var Expenses = React.createClass({
         });
     },
 
+    toggleList: function(){
+        this.setState({display_list: !this.state.display_list});
+    },
+
     render: function(){
         var total_expenses = 0;
-        if(Object.keys(this.state.data).length > 0){
+        var expenses_list = '';
+        var total_count = Object.keys(this.state.data).length;
+
+        if(total_count > 0){
+            total_count = this.state.data.meta.total_count;
+            // Total Expenses
             this.state.data.objects.map(function(pay, current){
-                if(!isNaN(pay.value)){
+                if(!isNaN(parseFloat(pay.value))){
                     total_expenses = parseFloat(pay.value) + total_expenses;
                 }
             });
-
             total_expenses = total_expenses.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-        }
 
-        return <div><strong>Total de despesas:</strong> R$ {total_expenses} </div>;
+            // List of expenses
+            expenses_list = this.state.data.objects.map(
+                function(pay, current){
+                    return <Expense e={pay} key={pay.id} />;
+                }
+            );
+        }
+        var style_list = (this.state.display_list) ? {'display': 'block'}:{'display': 'none'};
+
+        return (
+            <div>
+                <div><p><strong>Total de despesas:</strong> R$ {total_expenses}</p></div>
+                <div>
+                    <p><strong>{total_count} gastos declarados pelo parlamentar: </strong></p>
+                    <p><a href="javascript:void();" onClick={this.toggleList}> + Detalhado </a></p>
+                    <div style={style_list}>{expenses_list}</div>
+                </div>
+            </div>
+        )
     }
 
+});
+
+var Expense = React.createClass({
+    render: function(){
+        return <p>R$ {this.props.e.value} para {this.props.e.kind} </p>;
+    }
 });
 
 var Matters = React.createClass({
