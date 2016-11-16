@@ -1,17 +1,17 @@
-var Reports = React.createClass({
+var Expenses = React.createClass({
     getInitialState: function() {
         return {
-          reports: []
+          data: {}
         }
     },
 
     componentWillMount: function() {
         $.ajax({
-          url: '/api/v1/report/?limit=99&parliamentary__code=' + this.props.code,
+          url: '/api/v1/expense/?limit=9999&parliamentary__code=' + this.props.code,
           dataType: "jsonp",
           cache: false,
           success: function(data) {
-            this.setState({reports: data.objects});
+            this.setState({data: data});
             $('#loading').hide();
           }.bind(this),
           error: function(xhr, status, err) {
@@ -21,68 +21,20 @@ var Reports = React.createClass({
     },
 
     render: function(){
-        var reports = this.state.reports.map(
-            function(report, current){
-                return <Report r={report} key={report.id} />
-            }
-        );
+        var total_expenses = 0;
+        if(Object.keys(this.state.data).length > 0){
+            this.state.data.objects.map(function(pay, current){
+                if(!isNaN(pay.value)){
+                    total_expenses = parseFloat(pay.value) + total_expenses;
+                }
+            });
 
-        return <div>{reports}</div>;
-    }
-});
-
-var Report = React.createClass({
-    render: function(){
-        return (
-            <div className='reports'>
-                <h5>{this.props.r.type_description} na {this.props.r.commission.name} no {this.props.r.commission.house}</h5>
-            </div>
-        )
-    }
-});
-
-var Commissions = React.createClass({
-    getInitialState: function() {
-        return {
-          commissions: []
+            total_expenses = total_expenses.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
         }
-    },
 
-    componentWillMount: function() {
-        $.ajax({
-          url: '/api/v1/commission/?limit=99&parliamentary__code=' + this.props.code,
-          dataType: "jsonp",
-          cache: false,
-          success: function(data) {
-            this.setState({commissions: data.objects});
-            $('#loading').hide();
-          }.bind(this),
-          error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
-    },
-
-    render: function(){
-        var commissions = this.state.commissions.map(
-            function(commission, current){
-                return <Commission c={commission} key={commission.id} />
-            }
-        );
-
-        return <div>{commissions}</div>;
+        return <div><strong>Total de despesas:</strong> R$ {total_expenses} </div>;
     }
-});
 
-var Commission = React.createClass({
-    render: function(){
-        return (
-            <div className='commission'>
-                <h5><b>{this.props.c.code} - {this.props.c.participation_description} em {this.props.c.name}</b> <small> {this.props.c.house} {this.props.c.date_start}</small></h5>
-
-            </div>
-        )
-    }
 });
 
 var Matters = React.createClass({
@@ -107,14 +59,10 @@ var Matters = React.createClass({
         });
     },
 
-    redirect: function(){
-        location.href = '/parliamentary/profile/' + this.props.p.code;
-    },
-
     render: function(){
         var matters = this.state.matters.map(
             function(matter, current){
-                return <Matter m={matter} key={matter.id} />
+                return <Matter m={matter} key={matter.id} />;
             }
         );
 
@@ -140,7 +88,7 @@ var Matter = React.createClass({
             <div className='matter'>
                 <h5><b>{this.props.m.subtype} {this.props.m.code}</b><small> - {this.props.m.house} {this.props.m.year}</small></h5>
 
-                <p><a href="javascript:false" onClick={this.toggleDescription}> Leia o texto + </a></p>
+                <p><a href="javascript:return false" onClick={this.toggleDescription}> Leia o texto + </a></p>
                 <p style={style_description}  >{this.props.m.entry}</p>
             </div>
         )
@@ -215,6 +163,18 @@ var Parliamentary = React.createClass({
                         </div>
                         <div className="panel-body">
                             <ActualMandate code={this.props.p.code} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-lg-9">
+                    <div className="panel panel-default">
+                        <div className="panel-heading">
+                            Custos Parlamentar
+                        </div>
+                        <div className="panel-body">
+                            <Expenses code={this.props.p.code} />
+
                         </div>
                     </div>
                 </div>
