@@ -10,7 +10,9 @@ class OpenDataRequests:
 
     @staticmethod
     def expenses_csv(year=2016):
-        return OpenDataRequests.get_csv_into_list('http://www.senado.gov.br/transparencia/LAI/verba/' + str(year) + '.csv')
+        file = 'http://www.senado.gov.br/transparencia/LAI/verba/' + str(year) + '.csv'
+        print ("Waiting for downloading this file " + file)
+        return OpenDataRequests.get_csv_into_list(file)
 
     @staticmethod
     def get_csv_into_list(url):
@@ -19,6 +21,9 @@ class OpenDataRequests:
             decoded_content = download.content
             cr = csv.reader(decoded_content.splitlines(), delimiter=';')
             my_list = list(cr)
+
+        print ('Download Completed')
+
         return my_list
 
     @staticmethod

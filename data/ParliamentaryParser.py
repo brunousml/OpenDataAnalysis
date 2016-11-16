@@ -1,19 +1,38 @@
+# -*- coding: latin-1 -*-
 from data.OpenDataParliamentary import OpenDataParliamentaryBrParser
 from senate.models import *
-
+from StringCharsetHelper import StringCharset
 
 class OpenDataParliamentariansParser(object):
     def dump(self):
-        self.save_parliamentary_expenses()  # second
         self.save_parliamentarians()  # first
+        self.save_parliamentary_expenses()  # second
 
     def save_parliamentary_expenses(self):
         expenses = OpenDataParliamentaryBrParser.get_expenses()
         for expense in expenses:
-            if len(expense) > 4:
-                parli = ParliamentaryIdentification.objects.filter(name=expense[02].decode("latin-1"))
+            if len(expense) == 10 and expense[0] != "ANO":
+                parli_ident = ParliamentaryIdentification.objects.filter(name=expense[02].decode("latin-1"))
 
+                if len(parli_ident) > 0:
+                    print (expense)
+                    Expenses.objects.get_or_create(
+                        parliamentary=parli_ident[0].parliamentary,
+                        year=expense[0],
+                        month=expense[1],
+                        kind=StringCharset.latin_to_utf(expense[3]),
+                        cpf_cnpj=expense[4],
+                        document=StringCharset.latin_to_utf(expense[6]),
+                        date=self.get_date(expense[7]),
+                        value=expense[9]
+                    )
         return expenses
+
+    def get_date(self, date):
+        # format date
+        date = date.split('/')
+        date = date[2] + '-' + date[1] + '-' + date[0]
+        return date
 
     def save_parliamentarians(self):
         parliamentarians = OpenDataParliamentaryBrParser.get_parliamentarians()
@@ -26,8 +45,6 @@ class OpenDataParliamentariansParser(object):
 
         return parliamentarians
 
-
-
     def get_state(self, parser, node, field):
         state, create = State.objects.get_or_create(slug=parser.get_parliamentary_node_field(node, field))
 
@@ -37,12 +54,11 @@ class OpenDataParliamentariansParser(object):
         return state
 
     def add_parliamentary_identification(self, open_data, parliamentary):
-        parliamentary_identification, create = ParliamentaryIdentification.objects.get_or_create(
-            code=open_data.get_parliamentary_identity('CodigoParlamentar')
+        parliamentary_identification = ParliamentaryIdentification.objects.get_or_create(
+            parliamentary=parliamentary
         )
-
-        parliamentary_identification.parliamentary = parliamentary
-
+        parliamentary_identification = parliamentary_identification[0]
+        parliamentary_identification.code = open_data.get_parliamentary_identity('CodigoParlamentar').decode('latin-1')
         parliamentary_identification.name = open_data.get_parliamentary_identity('NomeParlamentar')
         parliamentary_identification.full_name = open_data.get_parliamentary_identity('NomeCompletoParlamentar')
         parliamentary_identification.gender = open_data.get_parliamentary_identity('SexoParlamentar')
@@ -188,6 +204,7 @@ class OpenDataParliamentariansParser(object):
             )
         return matter[0]
 
+
     def get_or_create_reports(self, content, parliamentary):
         for rep in content:
             if type(content) == dict:
@@ -264,5 +281,3 @@ class OpenDataParliamentariansParser(object):
 
         if 'OutrasInformacoes' in open_data.parliamentary:
             self.get_or_create_other_information(open_data.parliamentary['OutrasInformacoes']['Servico'], parliamentary)
-
-

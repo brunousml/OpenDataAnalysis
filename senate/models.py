@@ -27,6 +27,21 @@ class Parliamentary(models.Model):
         return unicode(id.name)
 
 
+class Expenses(models.Model):
+    parliamentary = models.ForeignKey(Parliamentary, null=True)
+
+    year = models.CharField(max_length=4)
+    month = models.CharField(max_length=2)
+    kind = models.CharField(max_length=200)
+    cpf_cnpj = models.CharField(max_length=20)
+    document = models.CharField(max_length=50)
+    date = models.DateField(max_length=20)
+    value = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return "Parlimanetary_id: " + str(self.parliamentary.id) + " - Description: " + self.kind
+
+
 class Matter(models.Model):
     parliamentary = models.ForeignKey(Parliamentary, null=True)
 
@@ -95,8 +110,6 @@ class ActualMandate(models.Model):
 
     def __unicode__(self):
         return str(self.code)
-
-
 
 
 class Legislature(models.Model):
