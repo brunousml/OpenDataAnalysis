@@ -88,6 +88,6 @@ var Parliamentarians = React.createClass({
 });
 
 ReactDOM.render(
-  <Parliamentarians  url='/api/v1/identification?format=jsonp&limit=200'/>,
+  <Parliamentarians  url='/api/v1/identification?format=jsonp&limit=9999'/>,
   document.getElementById('to-render')
 );
