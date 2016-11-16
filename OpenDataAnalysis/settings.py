@@ -85,6 +85,12 @@ DATABASES = {
         'PORT': '3306',
         'OPTIONS': {
             'sql_mode': 'traditional',
+            'charset': 'utf8',
+            'use_unicode': True,
+            'init_command': 'SET '
+                'storage_engine=INNODB,'
+                'character_set_connection=utf8,'
+                'collation_connection=utf8_bin'
         }
     }
 }
