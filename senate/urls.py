@@ -13,6 +13,7 @@ v1_api.register(CommissionResource())
 v1_api.register(ReportResource())
 v1_api.register(ParliamentaryIdentificationResource())
 v1_api.register(MandateResource())
+v1_api.register(ExpenseResource())
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),

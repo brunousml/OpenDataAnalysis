@@ -1,17 +1,18 @@
-var Reports = React.createClass({
+var Expenses = React.createClass({
     getInitialState: function() {
         return {
-          reports: []
+          data: {},
+          display_list: false
         }
     },
 
     componentWillMount: function() {
         $.ajax({
-          url: '/api/v1/report/?limit=99&parliamentary__code=' + this.props.code,
+          url: '/api/v1/expense/?limit=9999&parliamentary__code=' + this.props.code,
           dataType: "jsonp",
           cache: false,
           success: function(data) {
-            this.setState({reports: data.objects});
+            this.setState({data: data});
             $('#loading').hide();
           }.bind(this),
           error: function(xhr, status, err) {
@@ -20,68 +21,51 @@ var Reports = React.createClass({
         });
     },
 
+    toggleList: function(){
+        this.setState({display_list: !this.state.display_list});
+    },
+
     render: function(){
-        var reports = this.state.reports.map(
-            function(report, current){
-                return <Report r={report} key={report.id} />
-            }
-        );
+        var total_expenses = 0;
+        var expenses_list = '';
+        var total_count = Object.keys(this.state.data).length;
 
-        return <div>{reports}</div>;
-    }
-});
+        if(total_count > 0){
+            total_count = this.state.data.meta.total_count;
+            // Total Expenses
+            this.state.data.objects.map(function(pay, current){
+                if(!isNaN(parseFloat(pay.value))){
+                    total_expenses = parseFloat(pay.value) + total_expenses;
+                }
+            });
+            total_expenses = total_expenses.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 
-var Report = React.createClass({
-    render: function(){
-        return (
-            <div className='reports'>
-                <h5>{this.props.r.type_description} na {this.props.r.commission.name} no {this.props.r.commission.house}</h5>
-            </div>
-        )
-    }
-});
-
-var Commissions = React.createClass({
-    getInitialState: function() {
-        return {
-          commissions: []
+            // List of expenses
+            expenses_list = this.state.data.objects.map(
+                function(pay, current){
+                    return <Expense e={pay} key={pay.id} />;
+                }
+            );
         }
-    },
+        var style_list = (this.state.display_list) ? {'display': 'block'}:{'display': 'none'};
 
-    componentWillMount: function() {
-        $.ajax({
-          url: '/api/v1/commission/?limit=99&parliamentary__code=' + this.props.code,
-          dataType: "jsonp",
-          cache: false,
-          success: function(data) {
-            this.setState({commissions: data.objects});
-            $('#loading').hide();
-          }.bind(this),
-          error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
-    },
-
-    render: function(){
-        var commissions = this.state.commissions.map(
-            function(commission, current){
-                return <Commission c={commission} key={commission.id} />
-            }
-        );
-
-        return <div>{commissions}</div>;
-    }
-});
-
-var Commission = React.createClass({
-    render: function(){
         return (
-            <div className='commission'>
-                <h5><b>{this.props.c.code} - {this.props.c.participation_description} em {this.props.c.name}</b> <small> {this.props.c.house} {this.props.c.date_start}</small></h5>
-
+            <div>
+                <div><p><strong>Total de despesas:</strong> R$ {total_expenses}</p></div>
+                <div>
+                    <p><strong>{total_count} gastos declarados pelo parlamentar: </strong></p>
+                    <p><a href="javascript:void();" onClick={this.toggleList}> + Detalhado </a></p>
+                    <div style={style_list}>{expenses_list}</div>
+                </div>
             </div>
         )
+    }
+
+});
+
+var Expense = React.createClass({
+    render: function(){
+        return <p>R$ {this.props.e.value} para {this.props.e.kind} </p>;
     }
 });
 
@@ -107,14 +91,10 @@ var Matters = React.createClass({
         });
     },
 
-    redirect: function(){
-        location.href = '/parliamentary/profile/' + this.props.p.code;
-    },
-
     render: function(){
         var matters = this.state.matters.map(
             function(matter, current){
-                return <Matter m={matter} key={matter.id} />
+                return <Matter m={matter} key={matter.id} />;
             }
         );
 
@@ -140,7 +120,7 @@ var Matter = React.createClass({
             <div className='matter'>
                 <h5><b>{this.props.m.subtype} {this.props.m.code}</b><small> - {this.props.m.house} {this.props.m.year}</small></h5>
 
-                <p><a href="javascript:false" onClick={this.toggleDescription}> Leia o texto + </a></p>
+                <p><a href="javascript:return false" onClick={this.toggleDescription}> Leia o texto + </a></p>
                 <p style={style_description}  >{this.props.m.entry}</p>
             </div>
         )
@@ -215,6 +195,18 @@ var Parliamentary = React.createClass({
                         </div>
                         <div className="panel-body">
                             <ActualMandate code={this.props.p.code} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-lg-9">
+                    <div className="panel panel-default">
+                        <div className="panel-heading">
+                            Custos Parlamentar
+                        </div>
+                        <div className="panel-body">
+                            <Expenses code={this.props.p.code} />
+
                         </div>
                     </div>
                 </div>

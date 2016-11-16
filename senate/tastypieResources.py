@@ -35,6 +35,18 @@ class CommissionResource(ModelResource):
         }
 
 
+class ExpenseResource(ModelResource):
+    parliamentary = fields.ToOneField('senate.tastypieResources.ParliamentaryResource',
+                                       'parliamentary', verbose_name='parliamentary')
+
+    class Meta:
+        queryset = Expenses.objects.all()
+        resource_name = 'expense'
+        filtering = {
+            'parliamentary': ALL_WITH_RELATIONS
+        }
+
+
 class MandateResource(ModelResource):
     parliamentary = fields.ToOneField('senate.tastypieResources.ParliamentaryResource',
                                        'parliamentary', verbose_name='parliamentary')
