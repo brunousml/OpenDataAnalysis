@@ -38,9 +38,7 @@ class OpenDataParliamentariansParser(object):
     def save_parliamentarians(self):
         parliamentarians = OpenDataParliamentaryBrParser.get_parliamentarians()
         for el in parliamentarians:
-            print unicode(
-                el[u'IdentificacaoParlamentar'][u'CodigoParlamentar'] + ' - ' + el[u'IdentificacaoParlamentar'][
-                    u'NomeCompletoParlamentar'])
+            print unicode(el[u'IdentificacaoParlamentar'][u'CodigoParlamentar'] + ' - ' + el[u'IdentificacaoParlamentar'][u'NomeCompletoParlamentar'])
 
             self.save(el)
 
@@ -163,29 +161,31 @@ class OpenDataParliamentariansParser(object):
         return pp[0]
 
     def get_or_create_commissions(self, content, parliamentary):
+        commission = {}
         for com in content:
             if type(content) == dict:
                 ident = content
                 com = {'DescricaoParticipacao': '', 'DataInicio': ''}
             else:
-                ident = com['IdentificacaoComissao']
+                ident = com.get('IdentificacaoComissao')
 
-            commission = Commission.objects.get_or_create(
-                code=ident.get('CodigoComissao'),
-                slug=ident.get('SiglaComissao'),
-                name=ident.get('NomeComissao'),
-                house=ident.get('NomeCasaComissao'),
-                participation_description=com.get('DescricaoParticipacao'),
-                start_date=com.get('DataInicio'),
-            )
+            if com.has_key('CodigoComissao'):
+                commission = Commission.objects.get_or_create(
+                    code=ident.get('CodigoComissao'),
+                    slug=ident.get('SiglaComissao'),
+                    name=ident.get('NomeComissao'),
+                    house=ident.get('NomeCasaComissao'),
+                    participation_description=com.get('DescricaoParticipacao'),
+                    start_date=com.get('DataInicio'),
+                )
 
-            commission[0].parliamentary.add(parliamentary)
-            commission[0].save()
+                commission[0].parliamentary.add(parliamentary)
+                commission[0].save()
 
-            if len(content) == 5 and not 'DescricaoTipoRelator' in content:
+            if len(content) == 5 and not content.has_key('DescricaoTipoRelator') and len(commission) > 0:
                 return commission[0]
 
-        return commission[0]
+        return commission[0] if len(commission) > 0 else commission
 
     def get_or_create_matters(self, content, parliamentary):
         for mat in content:
@@ -268,17 +268,17 @@ class OpenDataParliamentariansParser(object):
         self.add_parliamentary_actual_mandate(open_data, parliamentary)
         self.add_parliamentary_political_party(open_data, parliamentary)
 
-        if open_data.parliamentary.has_key('MembroAtualComissoes'):
-            self.get_or_create_commissions(open_data.parliamentary['MembroAtualComissoes']['Comissao'], parliamentary)
-
-        if open_data.parliamentary.has_key('MateriasDeAutoriaTramitando'):
-            self.get_or_create_matters(open_data.parliamentary['MateriasDeAutoriaTramitando']['Materia'], parliamentary)
-
-        if open_data.parliamentary.has_key('RelatoriasAtuais'):
-            self.get_or_create_reports(open_data.parliamentary['RelatoriasAtuais']['Relatoria'], parliamentary)
-
-        if open_data.parliamentary.has_key('CargosAtuais'):
-            self.get_or_create_responsibility(open_data.parliamentary['CargosAtuais']['CargoAtual'], parliamentary)
-
-        if open_data.parliamentary.has_key('OutrasInformacoes'):
-            self.get_or_create_other_information(open_data.parliamentary['OutrasInformacoes']['Servico'], parliamentary)
+        # if open_data.parliamentary.has_key('MembroAtualComissoes'):
+        #     self.get_or_create_commissions(open_data.parliamentary['MembroAtualComissoes']['Comissao'], parliamentary)
+        #
+        # if open_data.parliamentary.has_key('MateriasDeAutoriaTramitando'):
+        #     self.get_or_create_matters(open_data.parliamentary['MateriasDeAutoriaTramitando']['Materia'], parliamentary)
+        #
+        # if open_data.parliamentary.has_key('RelatoriasAtuais'):
+        #     self.get_or_create_reports(open_data.parliamentary['RelatoriasAtuais']['Relatoria'], parliamentary)
+        #
+        # if open_data.parliamentary.has_key('CargosAtuais'):
+        #     self.get_or_create_responsibility(open_data.parliamentary['CargosAtuais']['CargoAtual'], parliamentary)
+        #
+        # if open_data.parliamentary.has_key('OutrasInformacoes'):
+        #     self.get_or_create_other_information(open_data.parliamentary['OutrasInformacoes']['Servico'], parliamentary)
