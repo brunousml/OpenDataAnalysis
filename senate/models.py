@@ -7,7 +7,7 @@ from OpenDataAnalysis import settings
 
 class State(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, null=True)
 
     def __unicode__(self):
         return self.slug
@@ -61,8 +61,8 @@ class Matter(models.Model):
 class Commission(models.Model):
     parliamentary = models.ManyToManyField(Parliamentary)
 
-    code = models.IntegerField()
-    slug = models.SlugField()
+    code = models.IntegerField(null=True)
+    slug = models.SlugField(null=True)
     name = models.CharField(max_length=200)
     house = models.CharField(max_length=200)
     participation_description = models.CharField(max_length=200)
@@ -86,7 +86,7 @@ class ParliamentaryIdentification(models.Model):
     parliamentary = models.ForeignKey(Parliamentary, null=True)
     state = models.ForeignKey(State, null=True, default=None)
 
-    code = models.IntegerField(unique=True)
+    code = models.IntegerField(unique=True,null=True)
     name = models.CharField(max_length=200)
     full_name = models.CharField(max_length=400)
     gender = models.CharField(max_length=20)

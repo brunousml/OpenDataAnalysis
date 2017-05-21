@@ -77,21 +77,8 @@ WSGI_APPLICATION = 'OpenDataAnalysis.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'opendata',
-        'USER': 'root',
-        'PASSWORD': 's3rv1d0r',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
-        'OPTIONS': {
-            'sql_mode': 'traditional',
-            'charset': 'utf8',
-            'use_unicode': True,
-            'init_command': 'SET '
-                'storage_engine=INNODB,'
-                'character_set_connection=utf8,'
-                'collation_connection=utf8_bin'
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'data.db')
     }
 }
 
