@@ -140,7 +140,7 @@ var Matter = React.createClass({
             <div className='matter'>
                 <h5><b>{this.props.m.subtype} {this.props.m.code}</b><small> - {this.props.m.house} {this.props.m.year}</small></h5>
 
-                <p><a href="javascript:false" onClick={this.toggleDescription}> Leia o texto + </a></p>
+                <p><a href="javascript:void()" onClick={this.toggleDescription}> Leia o texto + </a></p>
                 <p style={style_description}  >{this.props.m.entry}</p>
             </div>
         )
