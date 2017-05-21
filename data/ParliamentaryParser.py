@@ -206,6 +206,7 @@ class OpenDataParliamentariansParser(object):
             )
         return matter[0]
 
+
     def get_or_create_reports(self, content, parliamentary):
         for rep in content:
             if type(content) == dict:
