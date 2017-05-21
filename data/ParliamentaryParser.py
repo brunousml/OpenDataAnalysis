@@ -36,10 +36,11 @@ class OpenDataParliamentariansParser(object):
         return date
 
     def save_parliamentarians(self):
+        count = 0
         parliamentarians = OpenDataParliamentaryBrParser.get_parliamentarians()
         for el in parliamentarians:
-            print unicode(el[u'IdentificacaoParlamentar'][u'CodigoParlamentar'] + ' - ' + el[u'IdentificacaoParlamentar'][u'NomeCompletoParlamentar'])
-
+            count += 1
+            print count + " - " + el + "\n"
             self.save(el)
 
         return parliamentarians
@@ -268,12 +269,15 @@ class OpenDataParliamentariansParser(object):
         self.add_parliamentary_actual_mandate(open_data, parliamentary)
         self.add_parliamentary_political_party(open_data, parliamentary)
 
+        # Matter
+        if open_data.parliamentary.has_key('MateriasDeAutoriaTramitando'):
+            self.get_or_create_matters(open_data.parliamentary['MateriasDeAutoriaTramitando']['Materia'], parliamentary)
+
+
+        # REMOVE COMMENTS BELLOW TO ACTIVE THAT INFORMATION TO PARLIAMENTARY PROFILE
+
         # if open_data.parliamentary.has_key('MembroAtualComissoes'):
         #     self.get_or_create_commissions(open_data.parliamentary['MembroAtualComissoes']['Comissao'], parliamentary)
-        #
-        # if open_data.parliamentary.has_key('MateriasDeAutoriaTramitando'):
-        #     self.get_or_create_matters(open_data.parliamentary['MateriasDeAutoriaTramitando']['Materia'], parliamentary)
-        #
         # if open_data.parliamentary.has_key('RelatoriasAtuais'):
         #     self.get_or_create_reports(open_data.parliamentary['RelatoriasAtuais']['Relatoria'], parliamentary)
         #
