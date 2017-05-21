@@ -40,7 +40,7 @@ class OpenDataParliamentariansParser(object):
         parliamentarians = OpenDataParliamentaryBrParser.get_parliamentarians()
         for el in parliamentarians:
             count += 1
-            print count + " - " + el + "\n"
+            print count
             self.save(el)
 
         return parliamentarians
